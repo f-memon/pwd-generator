@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouGoogleit | Secure Password Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        /* Define the Inter font and Dark Theme Base */
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #0d1117; 
+            color: #ffffff;
+        }
+
+        /* Custom card style for UI containers */
+        .tool-ui-card {
+            background-color: #1f2937;
+            border: 1px solid #374151;
+        }
+
+        /* Custom Indigo Gradient for Action Buttons */
+        .btn-accent {
+            background-color: #4f46e5;
+            background-image: linear-gradient(to right, #4f46e5, #3b82f6);
+            transition: all 0.2s;
+            box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.4);
+        }
+        .btn-accent:hover:not(:disabled) {
+            background-image: linear-gradient(to left, #3730a3, #4f46e5);
+        }
+        .btn-accent:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+        
+        /* Custom Secondary Button Style */
+        .btn-secondary {
+            background-color: #374151;
+            border: 1px solid #4b5563;
+            transition: all 0.2s;
+        }
+        .btn-secondary:hover:not(:disabled) {
+            background-color: #4b5563;
+        }
+
+        /* Message Box Colors */
+        .msg-error { background-color: #450a0a; color: #fca5a5; }
+        .msg-success { background-color: #064e3b; color: #a7f3d0; }
+        .msg-info { background-color: #1e3a8a; color: #bfdbfe; }
+        
+        /* Result Display Style */
+        #password-display {
+            background-color: #111827; 
+            border: 1px solid #374151;
+            min-height: 56px; 
+            line-height: 1.4;
+            word-break: break-all;
+            white-space: normal;
+        }
+        
+        /* Custom Range Slider Styling (Tailwind doesn't style range inputs well) */
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 8px;
+            background: #4b5563;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+        /* Thumb styling for Webkit/Blink */
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #4f46e5;
+            cursor: grab;
+            box-shadow: 0 0 0 3px #1f2937;
+            transition: background .15s ease-in-out;
+        }
+        input[type="range"]::-webkit-slider-thumb:hover {
+            background: #3b82f6;
+        }
+        /* Track styling for Firefox */
+        input[type="range"]::-moz-range-track {
+            background: #4b5563;
+            border-radius: 4px;
+        }
+        /* Thumb styling for Firefox */
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border: none;
+            border-radius: 50%;
+            background: #4f46e5;
+            cursor: grab;
+        }
+
+        /* Password Strength Indicator */
+        .strength-bar-container {
+            height: 10px;
+            background-color: #374151;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        .strength-bar {
+            height: 100%;
+            width: 0;
+            transition: width 0.3s ease-in-out, background-color 0.3s ease-in-out;
+            border-radius: 5px;
+        }
+        
+    </style>
+</head>
+<body class="min-h-screen p-4 sm:p-8">
+
+    <nav class="sticky top-0 z-50 w-full bg-[#0d1117] border-b border-gray-800 shadow-xl backdrop-blur-sm bg-opacity-95">
+        <div class="max-w-7xl mx-auto px-6 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <a href="index.html" class="text-3xl font-extrabold tracking-tight text-indigo-400 hover:opacity-80 transition duration-300">
+                YouGoogleit
+            </a>
+        </div>
+    </nav>
+    
+    <main class="flex-grow max-w-4xl mx-auto w-full px-4 sm:px-8 py-6"> 
+        <div class="tool-ui-card shadow-2xl rounded-2xl p-5 md:p-6 border-gray-700"> 
+            
+            <header class="mb-5 relative border-b pb-4 border-gray-700"> 
+                <a href="index.html" class="absolute top-0 right-0 inline-flex items-center text-indigo-400 hover:text-indigo-300 transition duration-300 flex-shrink-0">
+                    Back to Tools
+                    <svg class="w-4 h-4 ml-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                    </svg>
+                </a>
+                <div class="text-left pr-28">
+                    <h1 class="text-2xl sm:text-3xl font-extrabold text-white mb-1">Secure Password Generator</h1> 
+                    <p class="text-gray-400 text-sm">Generates strong, random passwords client-side for maximum security.</p>
+                </div>
+            </header>
+
+            <div id="app">
+                
+                <div class="mb-6">
+                    <label class="block text-lg font-bold text-white mb-2">Generated Code</label>
+                    <div id="password-display" 
+                         class="w-full p-3 rounded-lg text-white text-lg sm:text-xl font-mono flex items-center justify-center cursor-default select-all"
+                         title="Click 'Generate' to create a new code.">
+                        Click Generate to start
+                    </div>
+                    
+                    <div class="mt-3 flex space-x-3">
+                        <button id="generate-btn" 
+                                class="btn-accent w-full py-2 sm:py-3 rounded-lg font-bold text-white text-md sm:text-lg shadow-xl flex-grow transition duration-200">
+                            <span id="generate-text">Generate Code</span>
+                        </button>
+                        <button id="copy-btn" 
+                                class="btn-secondary w-14 sm:w-20 py-2 sm:py-3 rounded-lg font-bold text-white text-sm shadow-xl flex-shrink-0 disabled:opacity-50"
+                                disabled
+                                title="Copy to Clipboard">
+                            <svg class="w-5 h-5 sm:w-6 sm:h-6 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v2M5 15L3 17a2 2 0 000 2h3m2-2a2 2 0 01-2-2h-3M16 9l-4 4-4-4" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="tool-ui-card rounded-xl p-4 md:p-5 mb-6 border-gray-700"> 
+                    <label class="block text-md font-bold text-white mb-3 border-b border-gray-700 pb-2">Settings & Criteria</label>
+
+                    <div class="mb-5">
+                        <div class="flex justify-between items-center mb-1">
+                            <label for="length-slider" class="text-gray-300 text-sm font-semibold">Code Length</label>
+                            <span id="length-display" class="text-indigo-400 text-lg font-bold">16</span>
+                        </div>
+                        <input type="range" id="length-slider" min="8" max="32" value="16" step="1">
+                    </div>
+
+                    <div class="flex items-center mb-4 pb-2 border-b border-gray-700">
+                        <input type="checkbox" id="pin-mode-checkbox" class="h-5 w-5 text-indigo-500 rounded border-gray-600 focus:ring-indigo-500 bg-gray-700">
+                        <label for="pin-mode-checkbox" class="ml-3 text-white text-sm font-semibold">
+                            Include only numbers (PIN Mode)
+                        </label>
+                    </div>
+
+                    <div class="flex items-center mb-4 pb-2 border-b border-gray-700">
+                        <input type="checkbox" id="no-repeat-checkbox" class="h-5 w-5 text-red-500 rounded border-gray-600 focus:ring-red-500 bg-gray-700">
+                        <label for="no-repeat-checkbox" class="ml-3 text-red-300 text-sm font-semibold">
+                            No repeating characters (Maximum length is pool size)
+                        </label>
+                    </div>
+
+
+                    <div id="character-criteria-group" class="grid grid-cols-2 gap-4 lg:grid-cols-4"> 
+                        <div class="flex items-center">
+                            <input type="checkbox" id="include-uppercase" checked class="h-5 w-5 text-indigo-500 rounded border-gray-600 focus:ring-indigo-500 bg-gray-700">
+                            <label for="include-uppercase" class="ml-3 text-white text-sm">Uppercase</label>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="checkbox" id="include-lowercase" checked class="h-5 w-5 text-indigo-500 rounded border-gray-600 focus:ring-indigo-500 bg-gray-700">
+                            <label for="include-lowercase" class="ml-3 text-white text-sm">Lowercase</label>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="checkbox" id="include-numbers" checked class="h-5 w-5 text-indigo-500 rounded border-gray-600 focus:ring-indigo-500 bg-gray-700">
+                            <label for="include-numbers" class="ml-3 text-white text-sm">Numbers</label>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="checkbox" id="include-symbols" checked class="h-5 w-5 text-indigo-500 rounded border-gray-600 focus:ring-indigo-500 bg-gray-700">
+                            <label for="include-symbols" class="ml-3 text-white text-sm">Symbols</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="tool-ui-card rounded-xl p-4 md:p-5 border-gray-700">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-gray-300 text-sm font-semibold">Code Strength</span>
+                        <span id="strength-label" class="text-yellow-500 font-bold">Pending...</span>
+                    </div>
+                    <div class="strength-bar-container">
+                        <div id="strength-bar" class="strength-bar"></div>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-3">Aim for "Strong" or "Excellent" by increasing the length and character diversity.</p>
+                </div>
+
+                <div id="message-box" class="mt-4 p-4 rounded-lg msg-info hidden" role="alert"></div> 
+
+            </div>
+        </div>
+    </main>
+
+    <footer class="w-full max-w-7xl mx-auto text-center py-4 mt-auto border-t border-gray-800">
+        <p class="text-gray-500 text-sm">
+            &copy; 2025 YouGoogleit. All rights reserved. | Simple, powerful document tools built for modern efficiency.
+        </p>
+    </footer>
+
+    <script>
+        // --- Constants ---
+        const CHAR_SETS = {
+            uppercase: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+            lowercase: 'abcdefghijklmnopqrstuvwxyz',
+            numbers: '0123456789',
+            symbols: '!@#$%^&*()-_+=[]{}|;:,.<>?/~'
+        };
+        const MIN_PASS_LENGTH = 8;
+        const MIN_PIN_LENGTH = 4;
+        const MAX_LENGTH = 32;
+
+        // --- Element Selection ---
+        const passwordDisplay = document.getElementById('password-display');
+        const generateBtn = document.getElementById('generate-btn');
+        const copyBtn = document.getElementById('copy-btn');
+        const lengthSlider = document.getElementById('length-slider');
+        const lengthDisplay = document.getElementById('length-display');
+        const messageBox = document.getElementById('message-box');
+        
+        const pinModeCheckbox = document.getElementById('pin-mode-checkbox'); 
+        const noRepeatCheckbox = document.getElementById('no-repeat-checkbox'); // NEW
+        const includeUppercase = document.getElementById('include-uppercase');
+        const includeLowercase = document.getElementById('include-lowercase');
+        const includeNumbers = document.getElementById('include-numbers');
+        const includeSymbols = document.getElementById('include-symbols'); 
+        
+        const strengthBar = document.getElementById('strength-bar');
+        const strengthLabel = document.getElementById('strength-label');
+        
+        const criteriaCheckboxes = [includeUppercase, includeLowercase, includeSymbols];
+
+        // ----------------------------------------------------
+        // --- Core Password Generation Logic ---
+        // ----------------------------------------------------
+
+        /**
+         * Generates a single secure password or PIN.
+         */
+        function generatePassword() {
+            const settings = getCurrentSettings();
+            const length = settings.length;
+            
+            let characterPool = '';
+            
+            // 1. Build the character pool
+            if (settings.uppercase) characterPool += CHAR_SETS.uppercase;
+            if (settings.lowercase) characterPool += CHAR_SETS.lowercase;
+            if (settings.numbers) characterPool += CHAR_SETS.numbers;
+            if (settings.symbols) characterPool += CHAR_SETS.symbols;
+
+            if (characterPool.length === 0) {
+                showMessage('error', 'Please select at least one character type.');
+                return null;
+            }
+
+            let password = '';
+
+            if (settings.noRepeat) {
+                // NO REPEAT LOGIC: Shuffle the entire pool and take the first 'length' characters.
+                if (characterPool.length < length) {
+                    // This should be prevented by constraints, but serves as a safety catch
+                    showMessage('error', `Cannot generate a ${length}-character code without repeats. Maximum length is ${characterPool.length}.`);
+                    return null;
+                }
+                password = shuffleString(characterPool).substring(0, length);
+                
+            } else {
+                // STANDARD LOGIC (with repeats): Ensure at least one of each selected type
+                
+                let guaranteedChars = [];
+                
+                if (settings.uppercase) guaranteedChars.push(getRandomChar(CHAR_SETS.uppercase));
+                if (settings.lowercase) guaranteedChars.push(getRandomChar(CHAR_SETS.lowercase));
+                if (settings.numbers) guaranteedChars.push(getRandomChar(CHAR_SETS.numbers));
+                if (settings.symbols) guaranteedChars.push(getRandomChar(CHAR_SETS.symbols));
+
+                // Fill the rest of the code length randomly (with repeats)
+                password = guaranteedChars.join('');
+                const remainingLength = length - password.length;
+                
+                for (let i = 0; i < remainingLength; i++) {
+                    password += getRandomChar(characterPool);
+                }
+                
+                // Shuffle the password
+                password = shuffleString(password);
+                
+                // Final truncation check
+                if (password.length > length) {
+                    password = password.substring(0, length);
+                }
+            }
+            
+            return password;
+        }
+
+        function getRandomChar(set) {
+            const randomBytes = new Uint32Array(1);
+            window.crypto.getRandomValues(randomBytes);
+            const index = randomBytes[0] % set.length;
+            return set.charAt(index);
+        }
+
+        function shuffleString(str) {
+            let array = str.split('');
+            for (let i = array.length - 1; i > 0; i--) {
+                const randomBytes = new Uint32Array(1);
+                window.crypto.getRandomValues(randomBytes);
+                const j = randomBytes[0] % (i + 1); 
+                
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array.join('');
+        }
+        
+        // ----------------------------------------------------
+        // --- Settings and UI Management ---
+        // ----------------------------------------------------
+
+        function getCurrentSettings() {
+            const isPinMode = pinModeCheckbox.checked;
+            const isNoRepeat = noRepeatCheckbox.checked;
+
+            return {
+                isPinMode: isPinMode,
+                noRepeat: isNoRepeat, // NEW
+                uppercase: !isPinMode && includeUppercase.checked,
+                lowercase: !isPinMode && includeLowercase.checked,
+                numbers: isPinMode || includeNumbers.checked,
+                symbols: !isPinMode && includeSymbols.checked,
+                length: parseInt(lengthSlider.value)
+            };
+        }
+        
+        /**
+         * Calculates the size of the total available character pool based on current settings.
+         */
+        function calculateMaxPoolSize(settings) {
+            let poolSize = 0;
+            if (settings.uppercase) poolSize += CHAR_SETS.uppercase.length;
+            if (settings.lowercase) poolSize += CHAR_SETS.lowercase.length;
+            if (settings.numbers) poolSize += CHAR_SETS.numbers.length;
+            if (settings.symbols) poolSize += CHAR_SETS.symbols.length;
+            return poolSize;
+        }
+
+        /**
+         * Updates slider min/max constraints based on PIN mode and No-Repeat mode.
+         */
+        function updateLengthConstraints() {
+            const settings = getCurrentSettings();
+            const minLength = settings.isPinMode ? MIN_PIN_LENGTH : MIN_PASS_LENGTH;
+            
+            let maxLength = MAX_LENGTH; // Default max length
+            
+            if (settings.noRepeat) {
+                // Max length is constrained by the character pool size
+                maxLength = calculateMaxPoolSize(settings);
+            }
+            
+            // Set slider constraints
+            lengthSlider.min = minLength;
+            // Only set max to MAX_LENGTH if it's currently smaller than the calculated pool max
+            lengthSlider.max = Math.min(maxLength, MAX_LENGTH);
+            
+            // If current value is outside the new valid range, adjust it
+            let currentValue = parseInt(lengthSlider.value);
+
+            if (currentValue < minLength) {
+                lengthSlider.value = minLength;
+            } else if (currentValue > lengthSlider.max) {
+                lengthSlider.value = lengthSlider.max;
+            }
+            
+            // Force UI update to show new constraints/status
+            updateUI(passwordDisplay.textContent); 
+        }
+
+        function togglePinMode() {
+            const isPinMode = pinModeCheckbox.checked;
+            
+            // Update UI elements based on mode
+            if (isPinMode) {
+                // PIN Mode: Disable criteria checkboxes
+                criteriaCheckboxes.forEach(cb => {
+                    cb.disabled = true;
+                });
+                // Ensure Numbers is the only one active/checked (visually ignore others)
+                includeNumbers.disabled = false;
+                includeNumbers.checked = true;
+                noRepeatCheckbox.disabled = false; // No-Repeat can still apply to PINs
+            } else {
+                // Password Mode: Re-enable criteria checkboxes
+                criteriaCheckboxes.forEach(cb => {
+                    cb.disabled = false;
+                });
+            }
+
+            // Update text labels
+            document.querySelector('label[for="length-slider"]').textContent = isPinMode ? 'PIN Length' : 'Password Length';
+            document.querySelector('label.block.text-lg.font-bold.text-white.mb-2').textContent = isPinMode ? 'Generated PIN' : 'Generated Code';
+            document.getElementById('generate-text').textContent = isPinMode ? 'Generate PIN' : 'Generate Code';
+            
+            // Re-evaluate constraints and UI
+            updateLengthConstraints();
+        }
+
+
+        function updateUI(password) {
+            const settings = getCurrentSettings();
+            const strength = getPasswordStrength(password, settings);
+            
+            // 1. Update Password/PIN Display
+            passwordDisplay.textContent = password;
+            passwordDisplay.classList.remove('text-gray-500'); 
+
+            // 2. Update Copy Button State
+            copyBtn.disabled = !password || password === 'Click Generate to start';
+            
+            // 3. Update Strength Indicator
+            strengthBar.style.width = strength.score + '%';
+            strengthBar.style.backgroundColor = strength.color;
+            strengthLabel.textContent = strength.label;
+            strengthLabel.style.color = strength.color;
+
+            // 4. Update Length Display
+            lengthDisplay.textContent = lengthSlider.value;
+            
+            // 5. Check if at least one character type is effectively enabled
+            const isAnyChecked = settings.uppercase || settings.lowercase || settings.numbers || settings.symbols;
+            generateBtn.disabled = !isAnyChecked;
+            if (!isAnyChecked) {
+                 showMessage('info', 'Select at least one character type to enable generation.');
+            }
+        }
+        
+        // ----------------------------------------------------
+        // --- Strength Evaluation Logic (Based on entropy) ---
+        // ----------------------------------------------------
+        
+        function getPasswordStrength(password, settings) {
+            if (!password || password.length === 0 || password === 'Click Generate to start') {
+                 return { score: 0, label: 'Pending...', color: '#374151' };
+            }
+
+            const length = password.length;
+            let poolSize = 0; 
+            
+            if (settings.uppercase) poolSize += CHAR_SETS.uppercase.length;
+            if (settings.lowercase) poolSize += CHAR_SETS.lowercase.length;
+            if (settings.numbers) poolSize += CHAR_SETS.numbers.length;
+            if (settings.symbols) poolSize += CHAR_SETS.symbols.length;
+
+            if (poolSize === 0) return { score: 0, label: 'Weak', color: '#dc2626' }; 
+
+            // Entropy (bits) calculation: H = L * log2(N)
+            // If noRepeat is on, the pool size effectively shrinks for each character, but we approximate for the bar.
+            const entropy = length * Math.log2(poolSize);
+            
+            let score = 0; 
+            let label = 'Weak';
+            let color = '#dc2626'; // Red
+
+            if (entropy >= 120) {
+                label = 'Excellent';
+                color = '#10b981'; // Emerald Green
+                score = 100;
+            } else if (entropy >= 80) {
+                label = 'Strong';
+                color = '#3b82f6'; // Blue
+                score = 75;
+            } else if (entropy >= 60) {
+                label = 'Good';
+                color = '#fbbf24'; // Yellow/Amber
+                score = 50;
+            } else if (entropy >= 40) {
+                label = 'Fair';
+                color = '#f59e0b'; // Orange
+                score = 25;
+            } else {
+                label = 'Weak';
+                color = '#dc2626'; // Red
+                score = 10;
+            }
+            
+            return { score, label, color };
+        }
+
+        // ----------------------------------------------------
+        // --- Utility Functions ---
+        // ----------------------------------------------------
+
+        async function copyToClipboard(text) {
+            if (!text || text === 'Click Generate to start') return;
+            try {
+                await navigator.clipboard.writeText(text);
+                showMessage('success', 'Code copied to clipboard!');
+            } catch (err) {
+                console.error('Failed to copy text: ', err);
+                showMessage('error', 'Failed to copy text. Please copy manually.');
+            }
+        }
+
+        function showMessage(type, content) {
+            messageBox.innerHTML = `<span>${content}</span>`;
+            messageBox.className = 'mt-4 p-4 rounded-lg transition-all duration-300 font-semibold';
+            messageBox.classList.remove('hidden', 'msg-error', 'msg-success', 'msg-info');
+
+            if (type === 'error') {
+                messageBox.classList.add('msg-error');
+            } else if (type === 'success') {
+                messageBox.classList.add('msg-success');
+            } else { 
+                messageBox.classList.add('msg-info');
+            }
+
+            setTimeout(() => {
+                messageBox.classList.add('hidden');
+            }, 3000);
+        }
+
+        // --- Event Listeners ---
+
+        generateBtn.addEventListener('click', () => {
+            const password = generatePassword();
+            if (password) {
+                updateUI(password);
+            }
+        });
+
+        copyBtn.addEventListener('click', () => {
+            copyToClipboard(passwordDisplay.textContent);
+        });
+
+        // Toggle PIN mode logic
+        pinModeCheckbox.addEventListener('change', togglePinMode);
+        
+        // NEW: Toggle No-Repeat mode logic
+        noRepeatCheckbox.addEventListener('change', updateLengthConstraints);
+
+        // Re-evaluate strength/UI when any setting changes
+        const settingsControls = [lengthSlider, includeUppercase, includeLowercase, includeNumbers, includeSymbols];
+        settingsControls.forEach(control => {
+            control.addEventListener('input', () => {
+                // If any character type checkbox changes, we must recalculate the pool max length
+                if (control !== lengthSlider) {
+                    updateLengthConstraints(); 
+                } else {
+                    updateUI(passwordDisplay.textContent);
+                }
+                messageBox.classList.add('hidden');
+            });
+        });
+        
+        // Initial setup
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initial call to set constraints and UI labels correctly
+            togglePinMode(); 
+            
+            // Set initial placeholder text
+            passwordDisplay.textContent = 'Click Generate to start';
+            passwordDisplay.classList.add('text-gray-500');
+            updateUI(null); 
+        });
+    </script>
+
+</body>
+</html>
